@@ -1,0 +1,85 @@
+<html>
+<head>
+  <link rel="stylesheet" href="css/foundation-3.2.5.min.css" />
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/chessboard-0.3.0.min.css" />
+
+  <!-- PGN data -->
+  <script src=sample_pgn.js></script>
+
+  <!-- PGN parser -->
+  <script src=chess.min.js></script>
+
+  <!-- board -->
+  <script src="js/json3.min.js"></script>
+  <script src="js/jquery-1.10.1.min.js"></script>
+  <script src="js/prettify.js"></script>
+  <script src="js/chessboard-0.3.0.min.js"></script>
+
+  <script>
+    var board = null;
+    var chess = null;
+    var move_list = [];
+    var current_move = 0;
+
+    function make_pgn_parsable(t) {
+	t = t.replace(/{.*?}/g, "");
+	t = t.replace(/] *1/, "]1");
+	return t;
+    }
+
+    function format_pgn_for_display(t) {
+	t = t.replace(/\[.*?\]/g, ""); 
+	return t;
+    }
+
+    function load_pgn(p) {
+	chess = new Chess();
+	board = ChessBoard('board', 'start');
+
+	$('#pgn').text(format_pgn_for_display(p));
+	chess.load_pgn(make_pgn_parsable(p));
+
+	move_list = chess.history();
+	current_move = 0;
+	chess.reset()	
+    }
+
+    function next_move(e) {
+        e.stopPropagation();
+        e.preventDefault();
+	chess.move(move_list[current_move]);
+	board.position(chess.fen());
+	current_move++;
+	highlight_current_move();
+    }
+
+    function highlight_current_move() {
+	//TODO: write this
+    }
+
+    function load_random_pgn() {
+	load_pgn(pgn[Math.floor(Math.random()*pgn.length)]);
+    }
+
+    function init() {
+	load_random_pgn();
+
+	$(document).on('click','body *', next_move);
+	$('body').keyup(function(e){
+	    // spacebar
+	    if(e.keyCode == 32){
+		load_random_pgn();
+	    }
+	});
+    }
+</script>
+</head>
+<body onload="init()">
+
+  <div id="board" style="width: 400px"></div>
+
+  <div id="pgn" style="position:relative;float:left;background-color:#fff;width: 400px"></div>
+
+</body>
+</html>
